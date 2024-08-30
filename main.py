@@ -50,6 +50,11 @@ def scrape_playlist(playlist_url):
                     artists.append(artist_name)
 
         df = pd.DataFrame({'Song': songs, 'Artist': artists})
+        if len(df) > 100:
+            df_sampled = df.sample(n=100, random_state=1)
+        else:
+            df_sampled = df
+
         return df, playlist_name
     except spotipy.exceptions.SpotifyException as e:
         raise ValueError(f"Error accessing Spotify playlist: {str(e)}")
