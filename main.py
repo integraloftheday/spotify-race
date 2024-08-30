@@ -22,28 +22,37 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Function to scrape songs from a Spotify playlist
 def scrape_playlist(playlist_url):
+    # Validate the URL format
+    if not re.match(r'https?://open\.spotify\.com/playlist/[a-zA-Z0-9]+', playlist_url):
+        raise ValueError("Invalid Spotify playlist URL format")
+
     playlist_id = playlist_url.split('/')[-1].split('?')[0]
-    playlist = sp.playlist(playlist_id)
-    playlist_name = playlist['name']
-    results = sp.playlist_tracks(playlist_id)
-    songs = []
-    artists = []
-    for track in results['items']:
-        song_name = track['track']['name']
-        artist_name = track['track']['artists'][0]['name']
-        songs.append(song_name)
-        artists.append(artist_name)
-
-    while results['next']:
-        results = sp.next(results)
+    try:
+        playlist = sp.playlist(playlist_id)
+        playlist_name = playlist['name']
+        results = sp.playlist_tracks(playlist_id)
+        songs = []
+        artists = []
         for track in results['items']:
-            song_name = track['track']['name']
-            artist_name = track['track']['artists'][0]['name']
-            songs.append(song_name)
-            artists.append(artist_name)
+            if track['track']:  # Check if track is not None
+                song_name = track['track']['name']
+                artist_name = track['track']['artists'][0]['name']
+                songs.append(song_name)
+                artists.append(artist_name)
 
-    df = pd.DataFrame({'Song': songs, 'Artist': artists})
-    return df, playlist_name
+        while results['next']:
+            results = sp.next(results)
+            for track in results['items']:
+                if track['track']:  # Check if track is not None
+                    song_name = track['track']['name']
+                    artist_name = track['track']['artists'][0]['name']
+                    songs.append(song_name)
+                    artists.append(artist_name)
+
+        df = pd.DataFrame({'Song': songs, 'Artist': artists})
+        return df, playlist_name
+    except spotipy.exceptions.SpotifyException as e:
+        raise ValueError(f"Error accessing Spotify playlist: {str(e)}")
 
 # Initialize FastHTML app
 app = FastHTML()
@@ -76,6 +85,13 @@ def generate_humor_response(race_table):
             "Warning: May cause spontaneous salsa dancing.",
             "Is this playlist legal? Because it's got me feeling loco.",
             "This mix is spicier than a jalapeño eating contest."
+        ],
+        'Indian':[
+            "Not just Bollywood...",
+            "Warning: May cause spontaneous garba dancing.",
+            "Is your playlist on a hunger strike? ",
+            "This mix is so Indian, it's outsourcing other playlists",
+            "Hello can I help with your computer?"
         ]
     }
 
