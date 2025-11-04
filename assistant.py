@@ -20,7 +20,7 @@ class Assistant :
         self.generation_config = generational_config
 
         self.model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+        model_name="gemini-2.5-flash",
         generation_config=self.generation_config,
         # safety_settings = Adjust safety settings
         # See https://ai.google.dev/gemini-api/docs/safety-settings
@@ -48,4 +48,5 @@ def main():
         print("Gemini:", response)
 
 if __name__ == '__main__':
+
     main()
